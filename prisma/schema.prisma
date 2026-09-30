@@ -12,6 +12,15 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique @db.VarChar(320)
+  passwordHash String      @db.VarChar(255)
+  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
+  links        ShortLink[]
+}
+
 model ShortLink {
   id          String      @id @default(cuid())
   /// The public short code used in URLs, for example "aB12xY".
@@ -21,6 +30,8 @@ model ShortLink {
   updatedAt   DateTime    @updatedAt @db.Timestamptz(3)
   expiresAt   DateTime?   @db.Timestamptz(3)
   isActive    Boolean     @default(true)
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   clicks      ClickEvent[]
 
   @@index([createdAt])
