@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ShortLink {
+  id          String      @id @default(cuid())
+  /// The public short code used in URLs, for example "aB12xY".
+  slug        String      @unique @db.VarChar(32)
+  destination String      @db.Text
+  createdAt   DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime    @updatedAt @db.Timestamptz(3)
+  expiresAt   DateTime?   @db.Timestamptz(3)
+  isActive    Boolean     @default(true)
+  clicks      ClickEvent[]
+
+  @@index([createdAt])
+  @@index([isActive, expiresAt])
+}
+
+/// One row per redirect. Click totals are derived by counting related events.
+model ClickEvent {
+  id          String    @id @default(cuid())
+  shortLinkId String
+  clickedAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  /// ISO 3166-1 alpha-2 country code, when available from the request IP.
+  countryCode String?   @db.Char(2)
+  /// Normalized broad category such as desktop, mobile, or tablet.
+  deviceType  String?   @db.VarChar(32)
+  browser     String?   @db.VarChar(128)
+  operatingSystem String? @db.VarChar(128)
+  /// Referring page URL. Null when absent or unavailable.
+  referrer    String?   @db.Text
+
+  shortLink   ShortLink @relation(fields: [shortLinkId], references: [id], onDelete: Cascade)
+
+  @@index([shortLinkId, clickedAt])
+  @@index([shortLinkId, countryCode, clickedAt])
+  @@index([shortLinkId, deviceType, clickedAt])
+  @@index([shortLinkId, browser, clickedAt])
+  @@index([shortLinkId, operatingSystem, clickedAt])
+}
