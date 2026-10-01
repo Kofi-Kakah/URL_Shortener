@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { getClickMetadata } from "../services/geolip.service.js";
 
 /** Resolve a public short code, record the visit, and send the browser onward. */
 export async function redirectToDestination(req, res, next) {
@@ -16,6 +17,7 @@ export async function redirectToDestination(req, res, next) {
       data: {
         shortLinkId: link.id,
         referrer: req.get("referer") || null,
+        ...getClickMetadata(req),
       },
     });
 
