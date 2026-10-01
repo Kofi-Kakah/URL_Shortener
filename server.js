@@ -6,6 +6,7 @@ import urlRouter from "./src/routes/url.routes.js";
 import redirectRouter from "./src/routes/redirect.routes.js";
 import analyticsRouter from "./src/routes/analytics.routes.js";
 import dashboardRouter from "./src/routes/dashboard.routes.js";
+import { errorMiddleware } from "./src/middleware/error.middleware.js";
 import { prisma } from "./src/lib/prisma.js";
 
 const app = express();
@@ -23,10 +24,7 @@ app.use("/", redirectRouter);
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
-app.use((error, _req, res, _next) => {
-  console.error(error);
-  res.status(500).json({ error: "Internal server error" });
-});
+app.use(errorMiddleware);
 
 const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
