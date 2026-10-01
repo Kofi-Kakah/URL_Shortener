@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./src/routes/auth.routes.js";
 import urlRouter from "./src/routes/url.routes.js";
 import redirectRouter from "./src/routes/redirect.routes.js";
+import analyticsRouter from "./src/routes/analytics.routes.js";
 import { prisma } from "./src/lib/prisma.js";
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/urls", urlRouter);
+app.use("/api/analytics", analyticsRouter);
 app.use("/", redirectRouter);
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
